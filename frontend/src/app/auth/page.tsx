@@ -85,13 +85,13 @@ export default function AuthPage() {
               <form onSubmit={handleMagicLink} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-[#43302E] mb-2 uppercase tracking-wider">Your Name</label>
-                  <input type="text" placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} required
+                  <input type="text" placeholder="Praseeda P Rao" value={name} onChange={e => setName(e.target.value)} required
                     className="w-full bg-white/60 border border-white focus:border-[#43302E]/30 rounded-2xl px-4 py-3.5 text-[#43302E] outline-none placeholder:text-[#43302E]/40 text-sm" />
                 </div>
                 
                 <div>
                   <label className="block text-xs font-bold text-[#43302E] mb-2 uppercase tracking-wider">Email Address</label>
-                  <input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} required
+                  <input type="email" placeholder="praseeda@example.com" value={email} onChange={e => setEmail(e.target.value)} required
                     className="w-full bg-white/60 border border-white focus:border-[#43302E]/30 rounded-2xl px-4 py-3.5 text-[#43302E] outline-none placeholder:text-[#43302E]/40 text-sm" />
                 </div>
 
