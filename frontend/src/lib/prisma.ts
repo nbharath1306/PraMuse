@@ -1,15 +1,17 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
 
-// Prevent multiple Prisma Client instances in development (hot reload)
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const globalForPrisma = globalThis as unknown as { prisma: any };
 
 function createPrismaClient() {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { PrismaClient } = require('@prisma/client');
   const connectionString = process.env.DATABASE_URL!;
   const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter, log: ['error'] });
 }
 
-export const prisma = globalForPrisma.prisma || createPrismaClient();
+export const prisma: ReturnType<typeof createPrismaClient> =
+  globalForPrisma.prisma || createPrismaClient();
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
