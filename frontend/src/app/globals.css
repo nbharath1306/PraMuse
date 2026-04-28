@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FFF1B5; /* Primary Cream */
+  --foreground: #43302E; /* Deep Burgundy */
+  --primary: #43302E; 
+  --primary-foreground: #FFF1B5;
+  --secondary: #C1DBE8; /* Secondary Blue */
+  --secondary-foreground: #43302E;
+  --card: rgba(255, 255, 255, 0.6);
+  --card-foreground: #43302E;
+  --border: rgba(67, 48, 46, 0.1);
+  --ring: #43302E;
+  --radius: 1.25rem; /* 20px */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-xl: var(--radius);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-poppins);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
