@@ -29,6 +29,7 @@ interface AppState {
   login: (email: string, name?: string) => void;
   logout: () => void;
   addSkill: (skill: Omit<Skill, "id" | "provider" | "avatar" | "trustScore">) => void;
+  deleteSkill: (id: number | string) => void;
   addRequest: () => void;
 }
 
@@ -99,6 +100,7 @@ export const useStore = create<AppState>()(
           };
           return { skills: [newSkill, ...state.skills] };
         }),
+      deleteSkill: (id) => set((state) => ({ skills: state.skills.filter(s => s.id !== id) })),
       addRequest: () => set((state) => ({ pendingRequests: state.pendingRequests + 1 })),
     }),
     {

@@ -6,6 +6,7 @@ import { Search, Filter, Star, Clock, ArrowRightLeft, BookOpen, CheckCircle, Rep
 import Image from "next/image";
 import { useStore } from "@/store/useStore";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const CATEGORIES = ["All", "Development", "Design", "Communication", "Marketing", "Creative"];
 
@@ -41,11 +42,12 @@ export default function ExplorePage() {
 
   const handleRequestSwap = (id: number | string) => {
     if (!isAuthenticated) {
-      alert("Please log in to request a swap!");
+      toast.error("Please log in to request a swap!");
       return;
     }
     setRequestedId(id);
     addRequest();
+    toast.success("Swap request sent to the provider!");
     setTimeout(() => setRequestedId(null), 3000); // Reset after 3 seconds
   };
 

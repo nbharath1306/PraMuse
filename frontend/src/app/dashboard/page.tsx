@@ -2,13 +2,14 @@
 
 import { useStore } from "@/store/useStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, LayoutDashboard, PlusCircle, Repeat, ArrowRightLeft, Star, X } from "lucide-react";
+import { LogOut, LayoutDashboard, PlusCircle, Repeat, ArrowRightLeft, Star, X, Trash2, BookOpen, Clock, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Dashboard() {
-  const { user, isAuthenticated, logout, pendingRequests, addSkill } = useStore();
+  const { user, isAuthenticated, logout, pendingRequests, addSkill, skills, deleteSkill } = useStore();
   const router = useRouter();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,22 +28,26 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     logout();
+    toast.info("You have successfully logged out.");
     router.push("/");
   };
 
   const handleAddSkill = (e: React.FormEvent) => {
     e.preventDefault();
     addSkill(formData);
+    toast.success("Skill successfully published to the marketplace!");
     setIsModalOpen(false);
     setFormData({ offering: "", seeking: "", category: "Development", level: "Beginner", availability: "" });
   };
 
+  const mySkills = skills.filter(s => s.provider === user.name);
+
   return (
-    <div className="min-h-screen bg-[#FFF1B5] relative">
+    <div className="min-h-screen bg-[#FFF1B5] relative pb-20">
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
       
       {/* Navbar */}
-      <nav className="w-full flex justify-between items-center py-6 px-8 md:px-16 z-10 glass border-b border-[#43302E]/10 sticky top-0">
+      <nav className="w-full flex justify-between items-center py-6 px-8 md:px-16 z-10 glass border-b border-[#43302E]/10 sticky top-0 mb-8">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
           <div className="w-8 h-8 rounded-lg bg-[#43302E] flex items-center justify-center">
             <Repeat className="text-[#FFF1B5] w-5 h-5" />
@@ -66,7 +71,7 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 py-12 z-10 relative">
+      <main className="max-w-6xl mx-auto px-4 z-10 relative">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -84,7 +89,7 @@ export default function Dashboard() {
           </button>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {/* Stat Cards */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass p-6 rounded-3xl border border-white/40 shadow-lg">
             <div className="w-12 h-12 rounded-2xl bg-white/50 flex items-center justify-center mb-4 text-[#43302E]"><ArrowRightLeft /></div>
@@ -98,7 +103,7 @@ export default function Dashboard() {
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass p-6 rounded-3xl border border-white/40 shadow-lg relative overflow-hidden">
             {pendingRequests > 0 && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-lg">
                 {pendingRequests}
               </motion.div>
             )}
@@ -107,6 +112,64 @@ export default function Dashboard() {
             <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{pendingRequests}</p>
           </motion.div>
         </div>
+
+        {/* User Published Skills */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+          <h2 className="text-2xl font-heading font-bold text-[#43302E] mb-6 flex items-center gap-2">
+            Your Published Skills <span className="bg-[#43302E]/10 text-[#43302E] text-xs px-2 py-1 rounded-full">{mySkills.length}</span>
+          </h2>
+          
+          {mySkills.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {mySkills.map((skill) => (
+                <div key={skill.id} className="glass p-6 rounded-[1.5rem] relative overflow-hidden border border-white/40 group">
+                  <button 
+                    onClick={() => {
+                      deleteSkill(skill.id);
+                      toast.info("Skill deleted successfully");
+                    }}
+                    className="absolute top-4 right-4 p-2 bg-red-500/10 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <div className="bg-[#43302E]/10 text-[#43302E] text-xs font-semibold px-3 py-1 rounded-full w-fit mb-4">
+                    {skill.category}
+                  </div>
+                  <div className="space-y-3 mb-6">
+                    <div>
+                      <p className="text-xs text-[#43302E]/60 font-medium uppercase tracking-wider mb-1 flex items-center"><BookOpen className="w-3 h-3 mr-1" /> Offering</p>
+                      <p className="font-heading font-bold text-lg text-[#43302E]">{skill.offering}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#43302E]/60 font-medium uppercase tracking-wider mb-1 flex items-center"><Search className="w-3 h-3 mr-1" /> Seeking</p>
+                      <p className="font-heading font-bold text-lg text-[#8A5A53]">{skill.seeking}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-[#43302E]/10 flex items-center justify-between">
+                    <div className="flex items-center text-xs text-[#43302E]/60 font-medium">
+                      <Clock className="w-3.5 h-3.5 mr-1" /> {skill.availability}
+                    </div>
+                    <span className="text-xs font-bold text-[#43302E] bg-white/50 px-2 py-1 rounded-lg">{skill.level}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="glass p-12 rounded-[2rem] text-center flex flex-col items-center justify-center border border-white/40 border-dashed">
+              <div className="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center mb-4 text-[#43302E]/40">
+                <BookOpen className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-heading font-bold text-[#43302E] mb-2">No skills published yet</h3>
+              <p className="text-[#43302E]/60 max-w-sm mb-6">Start sharing your expertise with the community. Offer a skill to get matches!</p>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-white/60 text-[#43302E] hover:bg-white px-6 py-2 rounded-xl font-bold transition-colors border border-[#43302E]/10 shadow-sm"
+              >
+                Publish First Skill
+              </button>
+            </div>
+          )}
+        </motion.div>
       </main>
 
       {/* Offer Skill Modal */}

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Repeat, ArrowRight, Mail, Lock, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
+import { toast } from "sonner";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,7 +16,9 @@ export default function AuthPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login(email, isLogin ? "Welcome Back User" : name);
+    const finalName = isLogin ? email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1) : name;
+    login(email, finalName);
+    toast.success(`Welcome to PraMuse, ${finalName}!`);
     router.push("/dashboard");
   };
 
