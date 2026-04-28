@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Search, Filter, Star, Clock, ArrowRightLeft, BookOpen, User } from "lucide-react";
 import Image from "next/image";
 
@@ -77,7 +77,7 @@ const MOCK_SKILLS = [
 
 const CATEGORIES = ["All", "Development", "Design", "Communication", "Marketing", "Creative"];
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -85,7 +85,7 @@ const containerVariants = {
   }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
