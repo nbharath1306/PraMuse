@@ -1,14 +1,24 @@
 "use client";
 
 import { useStore } from "@/store/useStore";
-import { motion } from "framer-motion";
-import { LogOut, LayoutDashboard, PlusCircle, Repeat, ArrowRightLeft, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { LogOut, LayoutDashboard, PlusCircle, Repeat, ArrowRightLeft, Star, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function Dashboard() {
-  const { user, isAuthenticated, logout } = useStore();
+  const { user, isAuthenticated, logout, pendingRequests, addSkill } = useStore();
   const router = useRouter();
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    offering: "",
+    seeking: "",
+    category: "Development",
+    level: "Beginner",
+    availability: ""
+  });
 
   if (!isAuthenticated || !user) {
     if (typeof window !== 'undefined') router.push("/auth");
@@ -18,6 +28,13 @@ export default function Dashboard() {
   const handleLogout = () => {
     logout();
     router.push("/");
+  };
+
+  const handleAddSkill = (e: React.FormEvent) => {
+    e.preventDefault();
+    addSkill(formData);
+    setIsModalOpen(false);
+    setFormData({ offering: "", seeking: "", category: "Development", level: "Beginner", availability: "" });
   };
 
   return (
@@ -53,13 +70,16 @@ export default function Dashboard() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-end mb-12"
+          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4"
         >
           <div>
             <h1 className="text-4xl font-heading font-bold text-[#43302E] mb-2">Welcome back, {user.name.split(' ')[0]}!</h1>
             <p className="text-[#43302E]/70">Here's an overview of your skill exchange activity.</p>
           </div>
-          <button className="bg-[#43302E] text-[#FFF1B5] px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:-translate-y-1 hover:shadow-xl transition-all">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#43302E] text-[#FFF1B5] px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:-translate-y-1 hover:shadow-xl transition-all"
+          >
             <PlusCircle className="w-5 h-5" /> Offer New Skill
           </button>
         </motion.div>
@@ -76,14 +96,88 @@ export default function Dashboard() {
             <p className="text-[#43302E]/60 text-sm font-medium">Trust Score</p>
             <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{user.trustScore}</p>
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass p-6 rounded-3xl border border-white/40 shadow-lg">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass p-6 rounded-3xl border border-white/40 shadow-lg relative overflow-hidden">
+            {pendingRequests > 0 && (
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                {pendingRequests}
+              </motion.div>
+            )}
             <div className="w-12 h-12 rounded-2xl bg-white/50 flex items-center justify-center mb-4 text-[#43302E]"><LayoutDashboard /></div>
             <p className="text-[#43302E]/60 text-sm font-medium">Pending Requests</p>
-            <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">5</p>
+            <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{pendingRequests}</p>
           </motion.div>
         </div>
-
       </main>
+
+      {/* Offer Skill Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-[#43302E]/40 backdrop-blur-sm"
+              onClick={() => setIsModalOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-[#FFF1B5] border border-white rounded-[2rem] p-8 shadow-2xl z-10"
+            >
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-white/50 hover:bg-white text-[#43302E] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <h2 className="text-2xl font-heading font-bold text-[#43302E] mb-6">Publish a Skill</h2>
+              
+              <form onSubmit={handleAddSkill} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#43302E]/70 mb-1">What can you teach? (Offering)</label>
+                  <input type="text" required value={formData.offering} onChange={e => setFormData({...formData, offering: e.target.value})} className="w-full bg-white/60 border border-white focus:border-[#43302E]/30 rounded-xl py-3 px-4 text-[#43302E] outline-none transition-all shadow-sm" placeholder="e.g. Advanced Next.js" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#43302E]/70 mb-1">What do you want to learn? (Seeking)</label>
+                  <input type="text" required value={formData.seeking} onChange={e => setFormData({...formData, seeking: e.target.value})} className="w-full bg-white/60 border border-white focus:border-[#43302E]/30 rounded-xl py-3 px-4 text-[#43302E] outline-none transition-all shadow-sm" placeholder="e.g. Spanish Conversation" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#43302E]/70 mb-1">Category</label>
+                    <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-white/60 border border-white rounded-xl py-3 px-4 text-[#43302E] outline-none shadow-sm appearance-none">
+                      <option>Development</option>
+                      <option>Design</option>
+                      <option>Communication</option>
+                      <option>Marketing</option>
+                      <option>Creative</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#43302E]/70 mb-1">Your Level</label>
+                    <select value={formData.level} onChange={e => setFormData({...formData, level: e.target.value})} className="w-full bg-white/60 border border-white rounded-xl py-3 px-4 text-[#43302E] outline-none shadow-sm appearance-none">
+                      <option>Beginner</option>
+                      <option>Intermediate</option>
+                      <option>Advanced</option>
+                      <option>Expert</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#43302E]/70 mb-1">Availability</label>
+                  <input type="text" required value={formData.availability} onChange={e => setFormData({...formData, availability: e.target.value})} className="w-full bg-white/60 border border-white focus:border-[#43302E]/30 rounded-xl py-3 px-4 text-[#43302E] outline-none transition-all shadow-sm" placeholder="e.g. Weekends, Evenings" />
+                </div>
+                
+                <button type="submit" className="w-full bg-[#43302E] text-[#FFF1B5] py-4 rounded-xl font-bold mt-6 hover:bg-[#43302E]/90 hover:shadow-lg transition-all">
+                  Publish to Marketplace
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

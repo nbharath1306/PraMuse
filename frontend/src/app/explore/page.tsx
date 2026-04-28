@@ -2,78 +2,9 @@
 
 import { useState } from "react";
 import { motion, Variants } from "framer-motion";
-import { Search, Filter, Star, Clock, ArrowRightLeft, BookOpen, User } from "lucide-react";
+import { Search, Filter, Star, Clock, ArrowRightLeft, BookOpen, CheckCircle } from "lucide-react";
 import Image from "next/image";
-
-// Mock Data
-const MOCK_SKILLS = [
-  {
-    id: 1,
-    provider: "Lena K.",
-    avatar: "https://i.pravatar.cc/150?u=lena",
-    trustScore: 4.9,
-    offering: "Advanced Python Programming",
-    seeking: "Acoustic Guitar Basics",
-    category: "Development",
-    level: "Expert",
-    availability: "Evenings & Weekends",
-  },
-  {
-    id: 2,
-    provider: "Pranav M.",
-    avatar: "https://i.pravatar.cc/150?u=pranav",
-    trustScore: 4.7,
-    offering: "UI/UX Design Systems",
-    seeking: "Fitness & Nutrition Coaching",
-    category: "Design",
-    level: "Advanced",
-    availability: "Weekdays",
-  },
-  {
-    id: 3,
-    provider: "Maya T.",
-    avatar: "https://i.pravatar.cc/150?u=maya",
-    trustScore: 5.0,
-    offering: "Spoken English & Public Speaking",
-    seeking: "Video Editing (Premiere Pro)",
-    category: "Communication",
-    level: "Expert",
-    availability: "Flexible",
-  },
-  {
-    id: 4,
-    provider: "David R.",
-    avatar: "https://i.pravatar.cc/150?u=david",
-    trustScore: 4.5,
-    offering: "Digital Marketing & SEO",
-    seeking: "Webflow Development",
-    category: "Marketing",
-    level: "Intermediate",
-    availability: "Weekends",
-  },
-  {
-    id: 5,
-    provider: "Sarah W.",
-    avatar: "https://i.pravatar.cc/150?u=sarah",
-    trustScore: 4.8,
-    offering: "Portrait Photography",
-    seeking: "Spanish Conversation",
-    category: "Creative",
-    level: "Advanced",
-    availability: "Mornings",
-  },
-  {
-    id: 6,
-    provider: "Alex J.",
-    avatar: "https://i.pravatar.cc/150?u=alex",
-    trustScore: 4.6,
-    offering: "React & Next.js Setup",
-    seeking: "Logo & Brand Identity",
-    category: "Development",
-    level: "Intermediate",
-    availability: "Evenings",
-  }
-];
+import { useStore } from "@/store/useStore";
 
 const CATEGORIES = ["All", "Development", "Design", "Communication", "Marketing", "Creative"];
 
@@ -93,13 +24,28 @@ const itemVariants: Variants = {
 export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [requestedId, setRequestedId] = useState<number | string | null>(null);
+  
+  const skills = useStore(state => state.skills);
+  const addRequest = useStore(state => state.addRequest);
+  const isAuthenticated = useStore(state => state.isAuthenticated);
 
-  const filteredSkills = MOCK_SKILLS.filter(skill => {
+  const filteredSkills = skills.filter(skill => {
     const matchesCategory = activeCategory === "All" || skill.category === activeCategory;
     const matchesSearch = skill.offering.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           skill.seeking.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const handleRequestSwap = (id: number | string) => {
+    if (!isAuthenticated) {
+      alert("Please log in to request a swap!");
+      return;
+    }
+    setRequestedId(id);
+    addRequest();
+    setTimeout(() => setRequestedId(null), 3000); // Reset after 3 seconds
+  };
 
   return (
     <div className="min-h-screen relative flex flex-col pt-24 pb-20 px-4 md:px-12 max-w-7xl mx-auto w-full">
@@ -177,7 +123,7 @@ export default function ExplorePage() {
             <motion.div 
               key={skill.id} 
               variants={itemVariants}
-              className="glass p-6 rounded-[1.5rem] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col"
+              className="glass p-6 rounded-[1.5rem] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col relative overflow-hidden"
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-3">
@@ -234,8 +180,17 @@ export default function ExplorePage() {
                   <Clock className="w-3.5 h-3.5 mr-1" />
                   {skill.availability}
                 </div>
-                <button className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors shadow-md">
-                  Request Swap
+                <button 
+                  onClick={() => handleRequestSwap(skill.id)}
+                  disabled={requestedId === skill.id}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md flex items-center gap-2
+                    ${requestedId === skill.id 
+                      ? "bg-green-600 text-white" 
+                      : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
+                >
+                  {requestedId === skill.id ? (
+                    <><CheckCircle className="w-4 h-4" /> Sent</>
+                  ) : "Request Swap"}
                 </button>
               </div>
             </motion.div>
