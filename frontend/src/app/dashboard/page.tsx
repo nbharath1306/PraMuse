@@ -115,25 +115,33 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {/* Stat Cards */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass p-6 rounded-3xl border border-white/40 shadow-lg">
+          <motion.div 
+            onClick={() => router.push("/inbox")}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} 
+            className="glass p-6 rounded-3xl border border-white/40 shadow-lg cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all"
+          >
             <div className="w-12 h-12 rounded-2xl bg-white/50 flex items-center justify-center mb-4 text-[#43302E]"><ArrowRightLeft /></div>
             <p className="text-[#43302E]/60 text-sm font-medium">Active Swaps</p>
-            <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">2</p>
+            <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{useStore.getState().activeSwaps?.length || 0}</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass p-6 rounded-3xl border border-white/40 shadow-lg">
             <div className="w-12 h-12 rounded-2xl bg-white/50 flex items-center justify-center mb-4 text-[#43302E]"><Star /></div>
             <p className="text-[#43302E]/60 text-sm font-medium">Trust Score</p>
             <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{user.trustScore}</p>
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass p-6 rounded-3xl border border-white/40 shadow-lg relative overflow-hidden">
-            {pendingRequests > 0 && (
+          <motion.div 
+            onClick={() => router.push("/inbox")}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} 
+            className="glass p-6 rounded-3xl border border-white/40 shadow-lg relative overflow-hidden cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all"
+          >
+            {(useStore.getState().requests?.length || 0) > 0 && (
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-lg">
-                {pendingRequests}
+                {useStore.getState().requests?.length || 0}
               </motion.div>
             )}
             <div className="w-12 h-12 rounded-2xl bg-white/50 flex items-center justify-center mb-4 text-[#43302E]"><LayoutDashboard /></div>
             <p className="text-[#43302E]/60 text-sm font-medium">Pending Requests</p>
-            <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{pendingRequests}</p>
+            <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{useStore.getState().requests?.length || 0}</p>
           </motion.div>
         </div>
 

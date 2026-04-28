@@ -21,17 +21,37 @@ type User = {
   trustScore: number;
 };
 
+export type Request = {
+  id: number;
+  fromUser: string;
+  avatar: string;
+  skillId: number | string;
+  skillOffering: string;
+  status: "pending" | "accepted" | "declined";
+};
+
+export type ActiveSwap = {
+  id: number;
+  partnerName: string;
+  partnerAvatar: string;
+  skillExchanged: string;
+  status: "active" | "completed";
+};
+
 interface AppState {
   user: User | null;
   isAuthenticated: boolean;
   skills: Skill[];
-  pendingRequests: number;
+  requests: Request[];
+  activeSwaps: ActiveSwap[];
   login: (email: string, name?: string) => void;
   logout: () => void;
   updateProfile: (data: { name: string; email: string; avatar: string }) => void;
   addSkill: (skill: Omit<Skill, "id" | "provider" | "avatar" | "trustScore">) => void;
   deleteSkill: (id: number | string) => void;
-  addRequest: () => void;
+  addRequest: (request: Omit<Request, "id" | "status">) => void;
+  acceptRequest: (id: number) => void;
+  completeSwap: (id: number, rating: number) => void;
 }
 
 const INITIAL_SKILLS: Skill[] = [
@@ -76,7 +96,10 @@ export const useStore = create<AppState>()(
       user: null,
       isAuthenticated: false,
       skills: INITIAL_SKILLS,
-      pendingRequests: 0,
+      requests: [
+        { id: 101, fromUser: "Sarah W.", avatar: "https://i.pravatar.cc/150?u=sarah", skillId: 1, skillOffering: "Advanced Python Programming", status: "pending" }
+      ],
+      activeSwaps: [],
       login: (email, name = "New User") => 
         set({ 
           user: { 
@@ -108,7 +131,32 @@ export const useStore = create<AppState>()(
           return { skills: [newSkill, ...state.skills] };
         }),
       deleteSkill: (id) => set((state) => ({ skills: state.skills.filter(s => s.id !== id) })),
-      addRequest: () => set((state) => ({ pendingRequests: state.pendingRequests + 1 })),
+      addRequest: (reqData) => set((state) => ({ 
+        requests: [{ ...reqData, id: Date.now(), status: "pending" }, ...state.requests] 
+      })),
+      acceptRequest: (id) => set((state) => {
+        const req = state.requests.find(r => r.id === id);
+        if (!req) return state;
+        const newSwap: ActiveSwap = {
+          id: Date.now(),
+          partnerName: req.fromUser,
+          partnerAvatar: req.avatar,
+          skillExchanged: req.skillOffering,
+          status: "active"
+        };
+        return {
+          requests: state.requests.filter(r => r.id !== id),
+          activeSwaps: [newSwap, ...state.activeSwaps]
+        };
+      }),
+      completeSwap: (id, rating) => set((state) => ({
+        activeSwaps: state.activeSwaps.filter(s => s.id !== id),
+        user: state.user ? { 
+          ...state.user, 
+          // Fake trust score calculation for demo
+          trustScore: Number(((state.user.trustScore * 5 + rating) / 6).toFixed(1)) 
+        } : null
+      })),
     }),
     {
       name: 'pramuse-storage',

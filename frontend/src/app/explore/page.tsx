@@ -40,13 +40,18 @@ export default function ExplorePage() {
     return matchesCategory && matchesSearch;
   });
 
-  const handleRequestSwap = (id: number | string) => {
-    if (!isAuthenticated) {
+  const handleRequestSwap = (skillId: number | string, offering: string) => {
+    if (!isAuthenticated || !user) {
       toast.error("Please log in to request a swap!");
       return;
     }
-    setRequestedId(id);
-    addRequest();
+    setRequestedId(skillId);
+    addRequest({
+      fromUser: user.name,
+      avatar: user.avatar,
+      skillId: skillId,
+      skillOffering: offering
+    });
     toast.success("Swap request sent to the provider!");
     setTimeout(() => setRequestedId(null), 3000); // Reset after 3 seconds
   };
@@ -208,7 +213,7 @@ export default function ExplorePage() {
                   {skill.availability}
                 </div>
                 <button 
-                  onClick={() => handleRequestSwap(skill.id)}
+                  onClick={() => handleRequestSwap(skill.id, skill.offering)}
                   disabled={requestedId === skill.id}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md flex items-center gap-2
                     ${requestedId === skill.id 
