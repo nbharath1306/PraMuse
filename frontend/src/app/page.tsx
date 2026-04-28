@@ -21,7 +21,7 @@ export default function Home() {
         </div>
         <div className="hidden md:flex items-center gap-8 font-medium">
           <a href="#how-it-works" className="hover:text-primary/70 transition-colors">How it works</a>
-          <a href="#explore" className="hover:text-primary/70 transition-colors">Explore Skills</a>
+          <a href="/explore" className="hover:text-primary/70 transition-colors">Explore Skills</a>
           <a href="#community" className="hover:text-primary/70 transition-colors">Community</a>
         </div>
         <div className="flex items-center gap-4">
