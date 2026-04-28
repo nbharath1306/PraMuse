@@ -28,6 +28,7 @@ interface AppState {
   pendingRequests: number;
   login: (email: string, name?: string) => void;
   logout: () => void;
+  updateProfile: (data: { name: string; email: string; avatar: string }) => void;
   addSkill: (skill: Omit<Skill, "id" | "provider" | "avatar" | "trustScore">) => void;
   deleteSkill: (id: number | string) => void;
   addRequest: () => void;
@@ -88,6 +89,12 @@ export const useStore = create<AppState>()(
           isAuthenticated: true 
         }),
       logout: () => set({ user: null, isAuthenticated: false }),
+      updateProfile: (data) => set((state) => {
+        if (!state.user) return state;
+        return {
+          user: { ...state.user, name: data.name, email: data.email, avatar: data.avatar }
+        };
+      }),
       addSkill: (skillData) => 
         set((state) => {
           if (!state.user) return state;

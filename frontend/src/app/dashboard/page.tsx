@@ -77,8 +77,10 @@ export default function Dashboard() {
               <p className="text-sm font-bold text-[#43302E] leading-tight">{user.name}</p>
               <p className="text-xs text-[#43302E]/70">Score: {user.trustScore}</p>
             </div>
-            <Image src={user.avatar} alt="Avatar" width={40} height={40} className="rounded-full border-2 border-white shadow-md" />
-            <button onClick={handleLogout} className="p-2 text-[#43302E]/50 hover:text-[#43302E] hover:bg-white/40 rounded-full transition-all">
+            <button onClick={() => router.push("/profile")} className="rounded-full border-2 border-white shadow-md hover:ring-2 hover:ring-[#43302E] hover:-translate-y-0.5 transition-all overflow-hidden w-10 h-10 relative">
+              <Image src={user.avatar} alt="Avatar" fill className="object-cover" />
+            </button>
+            <button onClick={handleLogout} className="p-2 text-[#43302E]/50 hover:text-[#43302E] hover:bg-white/40 rounded-full transition-all" title="Log out">
               <LogOut className="w-5 h-5" />
             </button>
           </div>
@@ -95,12 +97,20 @@ export default function Dashboard() {
             <h1 className="text-4xl font-heading font-bold text-[#43302E] mb-2">Welcome back, {user.name.split(' ')[0]}!</h1>
             <p className="text-[#43302E]/70">Here's an overview of your skill exchange activity.</p>
           </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="bg-[#43302E] text-[#FFF1B5] px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:-translate-y-1 hover:shadow-xl transition-all"
-          >
-            <PlusCircle className="w-5 h-5" /> Offer New Skill
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => router.push("/profile")}
+              className="bg-white/60 text-[#43302E] px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-white border border-white hover:-translate-y-1 hover:shadow-xl transition-all"
+            >
+              Edit Profile
+            </button>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-[#43302E] text-[#FFF1B5] px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:-translate-y-1 hover:shadow-xl transition-all"
+            >
+              <PlusCircle className="w-5 h-5" /> Offer New Skill
+            </button>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
