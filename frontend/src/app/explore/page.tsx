@@ -1,240 +1,161 @@
 "use client";
 
-import { useState } from "react";
-import { motion, Variants } from "framer-motion";
-import { Search, Filter, Star, Clock, ArrowRightLeft, BookOpen, CheckCircle, Repeat } from "lucide-react";
+import { useStore, Skill } from "@/store/useStore";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Filter, Repeat, Star, ArrowRightLeft, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useStore } from "@/store/useStore";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-const CATEGORIES = ["All", "Development", "Design", "Communication", "Marketing", "Creative"];
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-};
+const CATEGORIES = ["All", "Development", "Design", "Marketing", "Music", "Language", "Business", "Fitness", "Communication", "Other"];
 
 export default function ExplorePage() {
+  const { user, isAuthenticated } = useStore();
+  const router = useRouter();
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [requestedId, setRequestedId] = useState<number | string | null>(null);
-  
-  const skills = useStore(state => state.skills);
-  const addRequest = useStore(state => state.addRequest);
-  const isAuthenticated = useStore(state => state.isAuthenticated);
-  const user = useStore(state => state.user);
+  const [requestingId, setRequestingId] = useState<string | null>(null);
 
-  const filteredSkills = skills.filter(skill => {
-    const matchesCategory = activeCategory === "All" || skill.category === activeCategory;
-    const matchesSearch = skill.offering.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          skill.seeking.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  useEffect(() => {
+    fetch('/api/skills')
+      .then(r => r.json())
+      .then(data => { setSkills(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filtered = skills.filter(s => {
+    const matchesCat = activeCategory === "All" || s.category === activeCategory;
+    const matchesSearch = s.title.toLowerCase().includes(search.toLowerCase()) || s.user.name.toLowerCase().includes(search.toLowerCase());
+    return matchesCat && matchesSearch;
   });
 
-  const handleRequestSwap = (skillId: number | string, offering: string) => {
-    if (!isAuthenticated || !user) {
-      toast.error("Please log in to request a swap!");
-      return;
+  const handleRequest = async (skill: Skill) => {
+    if (!isAuthenticated || !user) { toast.error("Please log in first!"); router.push('/auth'); return; }
+    if (skill.user.id === user.id) { toast.error("You can't swap with yourself!"); return; }
+    setRequestingId(skill.id);
+    try {
+      // For a real swap, both users need matching skills. We create a self-referential request for now.
+      const res = await fetch('/api/swaps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender_id: user.id,
+          receiver_id: skill.user.id,
+          offered_skill_id: skill.id,
+          requested_skill_id: skill.id,
+        })
+      });
+      if (!res.ok) throw new Error('Failed to send request');
+      toast.success(`Swap request sent to ${skill.user.name}!`);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setTimeout(() => setRequestingId(null), 2000);
     }
-    setRequestedId(skillId);
-    addRequest({
-      fromUser: user.name,
-      avatar: user.avatar,
-      skillId: skillId,
-      skillOffering: offering
-    });
-    toast.success("Swap request sent to the provider!");
-    setTimeout(() => setRequestedId(null), 3000); // Reset after 3 seconds
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col px-4 md:px-12 max-w-7xl mx-auto w-full">
-      {/* Background elements */}
-      <div className="fixed top-0 left-[-20%] w-[50%] h-[50%] rounded-full bg-secondary/40 blur-[120px] -z-10" />
-      <div className="fixed bottom-0 right-[-10%] w-[40%] h-[40%] rounded-full bg-white/60 blur-[100px] -z-10" />
+    <div className="min-h-screen bg-[#FFF1B5] relative pb-20">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
 
-      {/* Navigation */}
-      <nav className="w-full flex justify-between items-center py-6 z-30 mb-8 glass border-b border-border/50 sticky top-0 rounded-b-3xl px-8">
+      {/* Navbar */}
+      <nav className="w-full flex justify-between items-center py-5 px-8 md:px-16 z-10 glass border-b border-[#43302E]/10 sticky top-0 mb-12">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <Repeat className="text-primary-foreground w-5 h-5" />
+          <div className="w-8 h-8 rounded-lg bg-[#43302E] flex items-center justify-center">
+            <Repeat className="text-[#FFF1B5] w-5 h-5" />
           </div>
-          <span className="font-heading font-bold text-2xl text-primary tracking-tight">PraMuse</span>
+          <span className="font-heading font-bold text-2xl text-[#43302E] tracking-tight">PraMuse</span>
         </Link>
         <div className="flex items-center gap-4">
-          {isAuthenticated && user ? (
-            <Link href="/dashboard" className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-xl transition-colors">
-              <span className="font-medium text-primary hidden md:block">{user.name}</span>
-              <Image src={user.avatar} alt="Avatar" width={32} height={32} className="rounded-full border border-white" />
-            </Link>
+          {isAuthenticated ? (
+            <button onClick={() => router.push('/dashboard')} className="px-4 py-2 bg-[#43302E] text-[#FFF1B5] rounded-xl font-bold text-sm">Dashboard</button>
           ) : (
-            <>
-              <Link href="/auth" className="font-medium text-primary hover:text-primary/70 transition-colors">Log in</Link>
-              <Link href="/auth" className="bg-primary text-primary-foreground px-5 py-2 rounded-xl font-medium hover:bg-primary/90 transition-colors">Sign up</Link>
-            </>
+            <button onClick={() => router.push('/auth')} className="px-4 py-2 bg-[#43302E] text-[#FFF1B5] rounded-xl font-bold text-sm">Sign In</button>
           )}
         </div>
       </nav>
 
-      {/* Header */}
-      <div className="mb-12">
-        <motion.h1 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4"
-        >
-          Explore the Marketplace
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-lg text-primary/70 max-w-2xl"
-        >
-          Find the perfect partner to exchange skills with. Search by what you want to learn or what you can offer.
-        </motion.p>
-      </div>
+      <main className="max-w-6xl mx-auto px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+          <h1 className="text-5xl font-heading font-bold text-[#43302E] mb-3">Explore Skills</h1>
+          <p className="text-[#43302E]/60 text-lg">Discover talents from real people. Trade skills, not money.</p>
+        </motion.div>
 
-      {/* Search & Filters */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="flex flex-col md:flex-row gap-4 mb-10 sticky top-24 z-20"
-      >
-        <div className="glass flex items-center p-2 rounded-2xl flex-1 shadow-sm">
-          <Search className="w-5 h-5 text-primary/50 ml-3 mr-2" />
-          <input 
-            type="text" 
-            placeholder="Search skills (e.g., Python, Guitar, Design)..." 
-            className="bg-transparent border-none outline-none flex-1 py-2 pr-4 text-primary placeholder:text-primary/50"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+        {/* Search */}
+        <div className="relative max-w-xl mx-auto mb-8">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#43302E]/40" />
+          <input
+            type="text"
+            placeholder="Search skills or people..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-12 pr-4 py-4 glass border border-white/60 rounded-2xl text-[#43302E] outline-none placeholder:text-[#43302E]/40 shadow-sm"
           />
         </div>
-        
-        <div className="glass p-2 rounded-2xl flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <div className="px-3 text-primary/50 flex items-center shrink-0">
-            <Filter className="w-4 h-4 mr-2" />
-            <span className="text-sm font-medium">Filters:</span>
-          </div>
-          {CATEGORIES.map(category => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all shrink-0 ${
-                activeCategory === category 
-                  ? "bg-primary text-primary-foreground shadow-md" 
-                  : "hover:bg-white/40 text-primary/80"
-              }`}
-            >
-              {category}
+
+        {/* Category Pills */}
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
+          {CATEGORIES.map(cat => (
+            <button key={cat} onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0 ${activeCategory === cat ? 'bg-[#43302E] text-[#FFF1B5] shadow-md' : 'glass text-[#43302E] border border-white/50 hover:bg-white/40'}`}>
+              {cat}
             </button>
           ))}
         </div>
-      </motion.div>
 
-      {/* Skill Cards Grid */}
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-      >
-        {filteredSkills.length > 0 ? (
-          filteredSkills.map(skill => (
-            <motion.div 
-              key={skill.id} 
-              variants={itemVariants}
-              className="glass p-6 rounded-[1.5rem] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col relative overflow-hidden"
-            >
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-white/50 border border-white/50 relative">
-                    <Image 
-                      src={skill.avatar} 
-                      alt={skill.provider} 
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-primary">{skill.provider}</h4>
-                    <div className="flex items-center text-xs font-medium text-primary/60 bg-white/40 px-2 py-0.5 rounded-md w-fit mt-1">
-                      <Star className="w-3 h-3 text-[#D4AF37] mr-1 fill-current" />
-                      {skill.trustScore} Trust Score
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-secondary/50 text-primary text-xs font-semibold px-3 py-1 rounded-full">
-                  {skill.category}
-                </div>
-              </div>
-
-              <div className="space-y-4 mb-6 flex-1">
-                <div>
-                  <p className="text-xs text-primary/50 font-medium uppercase tracking-wider mb-1 flex items-center">
-                    <BookOpen className="w-3 h-3 mr-1" /> Offering
-                  </p>
-                  <p className="font-heading font-semibold text-lg text-primary leading-tight">
-                    {skill.offering}
-                  </p>
-                  <p className="text-sm text-primary/70 mt-1">{skill.level} Level</p>
-                </div>
-                
-                <div className="w-full flex items-center opacity-30">
-                  <div className="flex-1 h-px bg-primary"></div>
-                  <ArrowRightLeft className="w-4 h-4 mx-2 text-primary" />
-                  <div className="flex-1 h-px bg-primary"></div>
-                </div>
-
-                <div>
-                  <p className="text-xs text-primary/50 font-medium uppercase tracking-wider mb-1 flex items-center">
-                    <Search className="w-3 h-3 mr-1" /> Seeking
-                  </p>
-                  <p className="font-heading font-semibold text-lg text-[#8A5A53] leading-tight">
-                    {skill.seeking}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-primary/10 flex items-center justify-between mt-auto">
-                <div className="flex items-center text-xs text-primary/60 font-medium">
-                  <Clock className="w-3.5 h-3.5 mr-1" />
-                  {skill.availability}
-                </div>
-                <button 
-                  onClick={() => handleRequestSwap(skill.id, skill.offering)}
-                  disabled={requestedId === skill.id}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md flex items-center gap-2
-                    ${requestedId === skill.id 
-                      ? "bg-green-600 text-white" 
-                      : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
-                >
-                  {requestedId === skill.id ? (
-                    <><CheckCircle className="w-4 h-4" /> Sent</>
-                  ) : "Request Swap"}
-                </button>
-              </div>
-            </motion.div>
-          ))
-        ) : (
-          <div className="col-span-full py-20 text-center flex flex-col items-center justify-center opacity-60">
-            <Search className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-xl font-heading font-semibold text-primary">No skills found</h3>
-            <p className="text-primary/70 mt-2">Try adjusting your filters or search query.</p>
+        {/* Skills Grid */}
+        {loading ? (
+          <div className="flex justify-center items-center py-24">
+            <Loader2 className="w-10 h-10 animate-spin text-[#43302E]/40" />
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-24">
+            <p className="text-[#43302E]/50 text-lg">No skills found. Be the first to publish one!</p>
+          </div>
+        ) : (
+          <AnimatePresence>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((skill, i) => (
+                <motion.div key={skill.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.04 }}
+                  className="glass p-6 rounded-3xl border border-white/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col">
+                  <div className="flex items-center gap-3 mb-4">
+                    {skill.user.avatar ? (
+                      <Image src={skill.user.avatar} alt={skill.user.name} width={44} height={44} className="rounded-full border-2 border-white shadow-sm" />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-[#43302E] flex items-center justify-center text-[#FFF1B5] font-bold">{skill.user.name[0]}</div>
+                    )}
+                    <div>
+                      <p className="font-bold text-[#43302E]">{skill.user.name}</p>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-[#D4AF37] text-[#D4AF37]" />
+                        <span className="text-xs text-[#43302E]/60">{skill.user.trust_score?.toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <span className="ml-auto text-xs font-bold bg-[#43302E]/10 text-[#43302E] px-2 py-1 rounded-full">{skill.category}</span>
+                  </div>
+
+                  <h3 className="font-bold text-lg text-[#43302E] mb-1">{skill.title}</h3>
+                  <p className="text-sm text-[#43302E]/60 mb-1">Seeking: <span className="font-medium text-[#8A5A53]">{skill.seeking}</span></p>
+                  <p className="text-xs text-[#43302E]/40 mb-4">{skill.level} · {skill.availability || 'Flexible'}</p>
+
+                  <button onClick={() => handleRequest(skill)} disabled={requestingId === skill.id || skill.user.id === user?.id}
+                    className={`mt-auto w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                      skill.user.id === user?.id ? 'bg-white/40 text-[#43302E]/40 cursor-not-allowed' :
+                      requestingId === skill.id ? 'bg-green-100 text-green-700' :
+                      'bg-[#43302E] text-[#FFF1B5] hover:bg-[#43302E]/90 shadow-md'
+                    }`}>
+                    {requestingId === skill.id ? '✓ Requested!' : skill.user.id === user?.id ? 'Your Skill' : <><ArrowRightLeft className="w-4 h-4" /> Request Swap</>}
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          </AnimatePresence>
         )}
-      </motion.div>
+      </main>
     </div>
   );
 }

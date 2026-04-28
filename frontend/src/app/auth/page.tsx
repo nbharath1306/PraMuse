@@ -1,181 +1,109 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Repeat, ArrowRight, Mail, Lock, User as UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
+import { motion } from "framer-motion";
+import { Repeat, Mail, User as UserIcon, ArrowRight, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const { isAuthenticated, login } = useStore();
   const router = useRouter();
-  const login = useStore((state) => state.login);
-  const isAuthenticated = useStore((state) => state.isAuthenticated);
+  const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "" });
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
+    setMounted(true);
+    if (isAuthenticated) router.push("/dashboard");
   }, [isAuthenticated, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  if (!mounted) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalName = isLogin ? email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1) : name;
-    login(email, finalName);
-    toast.success(`Welcome to PraMuse, ${finalName}!`);
-    router.push("/dashboard");
+    if (!form.name.trim() || !form.email.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await login(form.email.trim(), form.name.trim());
+      toast.success("Welcome to PraMuse!");
+      router.push("/dashboard");
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-[#FFF1B5]">
-      {/* Animated Abstract Background Elements */}
-      <motion.div 
-        animate={{ 
-          rotate: [0, 360], 
-          scale: [1, 1.2, 1],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-[#C1DBE8] to-[#FFF1B5] blur-[120px] opacity-70"
-      />
-      <motion.div 
-        animate={{ 
-          rotate: [360, 0], 
-          scale: [1, 1.5, 1],
-        }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tl from-white to-[#C1DBE8] blur-[150px] opacity-80"
-      />
+    <div className="min-h-screen bg-[#FFF1B5] flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#43302E]/5 blur-3xl" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#D4AF37]/10 blur-3xl" />
 
-      {/* Floating Logo Top Left */}
-      <div 
-        className="absolute top-8 left-8 md:top-12 md:left-12 flex items-center gap-2 cursor-pointer z-50 mix-blend-color-burn"
-        onClick={() => router.push("/")}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md z-10"
       >
-        <div className="w-10 h-10 rounded-xl bg-[#43302E] flex items-center justify-center shadow-2xl">
-          <Repeat className="text-[#FFF1B5] w-6 h-6" />
-        </div>
-        <span className="font-heading font-bold text-3xl text-[#43302E] tracking-tight">PraMuse</span>
-      </div>
-
-      {/* Main Glass Panel */}
-      <motion.div 
-        initial={{ opacity: 0, y: 40, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        className="relative z-10 w-full max-w-[1000px] h-[650px] mx-4 rounded-[2.5rem] overflow-hidden flex shadow-2xl border border-white/40 bg-white/20 backdrop-blur-2xl"
-      >
-        
-        {/* Left Side: Content/Brand area */}
-        <div className="hidden md:flex flex-col justify-between w-1/2 p-16 relative bg-[#43302E]/5 border-r border-white/20">
-          <div>
-            <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl lg:text-5xl font-heading font-bold text-[#43302E] leading-tight mb-6"
-            >
-              Trade Skills.<br />Build Futures.
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-lg text-[#43302E]/70"
-            >
-              Join the exclusive network of creators and professionals exchanging value without money.
-            </motion.p>
+        <Link href="/" className="flex items-center justify-center gap-2 mb-10">
+          <div className="w-9 h-9 rounded-xl bg-[#43302E] flex items-center justify-center shadow-lg">
+            <Repeat className="text-[#FFF1B5] w-5 h-5" />
           </div>
+          <span className="font-heading font-bold text-3xl text-[#43302E] tracking-tight">PraMuse</span>
+        </Link>
 
-          <div className="flex -space-x-4">
-            {[1,2,3,4].map((i) => (
-              <img 
-                key={i} 
-                src={`https://i.pravatar.cc/150?img=${i+10}`} 
-                className="w-12 h-12 rounded-full border-2 border-[#FFF1B5] shadow-sm"
-                alt="Member"
+        <div className="glass p-8 rounded-[2rem] border border-white/50 shadow-2xl">
+          <h1 className="text-2xl font-heading font-bold text-[#43302E] mb-1">Welcome</h1>
+          <p className="text-[#43302E]/60 mb-8 text-sm">Join thousands of people trading skills, not money.</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#43302E]/40" />
+              <input
+                type="text"
+                placeholder="Your full name"
+                value={form.name}
+                onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
+                className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-white focus:border-[#43302E]/30 rounded-2xl text-[#43302E] outline-none shadow-sm placeholder:text-[#43302E]/40 transition-all"
+                required
               />
-            ))}
-            <div className="w-12 h-12 rounded-full border-2 border-[#FFF1B5] bg-[#C1DBE8] flex items-center justify-center text-[#43302E] text-xs font-bold shadow-sm">
-              +10k
             </div>
-          </div>
-        </div>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#43302E]/40" />
+              <input
+                type="email"
+                placeholder="Your email address"
+                value={form.email}
+                onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
+                className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-white focus:border-[#43302E]/30 rounded-2xl text-[#43302E] outline-none shadow-sm placeholder:text-[#43302E]/40 transition-all"
+                required
+              />
+            </div>
 
-        {/* Right Side: Auth Forms */}
-        <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center relative bg-white/40">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isLogin ? "login" : "signup"}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="w-full max-w-sm mx-auto"
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#43302E] text-[#FFF1B5] py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#43302E]/90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
             >
-              <h3 className="font-heading text-3xl font-bold text-[#43302E] mb-2">
-                {isLogin ? "Welcome back" : "Create an account"}
-              </h3>
-              <p className="text-[#43302E]/60 mb-8">
-                {isLogin ? "Enter your details to access your dashboard." : "Start your skill exchange journey today."}
-              </p>
+              {isLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Getting you in...</>
+              ) : (
+                <>Enter PraMuse <ArrowRight className="w-4 h-4" /></>
+              )}
+            </button>
+          </form>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
-                  <div className="relative group">
-                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#43302E]/40 group-focus-within:text-[#43302E] transition-colors" />
-                    <input 
-                      type="text" 
-                      required
-                      placeholder="Full Name" 
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-white/50 border border-white focus:border-[#43302E]/30 rounded-2xl py-4 pl-12 pr-4 text-[#43302E] placeholder:text-[#43302E]/40 outline-none transition-all shadow-sm"
-                    />
-                  </div>
-                )}
-                <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#43302E]/40 group-focus-within:text-[#43302E] transition-colors" />
-                  <input 
-                    type="email" 
-                    required
-                    placeholder="Email Address" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-white/50 border border-white focus:border-[#43302E]/30 rounded-2xl py-4 pl-12 pr-4 text-[#43302E] placeholder:text-[#43302E]/40 outline-none transition-all shadow-sm"
-                  />
-                </div>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#43302E]/40 group-focus-within:text-[#43302E] transition-colors" />
-                  <input 
-                    type="password" 
-                    required
-                    placeholder="Password" 
-                    className="w-full bg-white/50 border border-white focus:border-[#43302E]/30 rounded-2xl py-4 pl-12 pr-4 text-[#43302E] placeholder:text-[#43302E]/40 outline-none transition-all shadow-sm"
-                  />
-                </div>
-
-                <button 
-                  type="submit" 
-                  className="w-full bg-[#43302E] text-[#FFF1B5] py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-[#43302E]/90 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 mt-6"
-                >
-                  {isLogin ? "Sign In" : "Join the Network"}
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </form>
-
-              <div className="mt-8 text-center">
-                <button 
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-[#43302E]/70 hover:text-[#43302E] font-medium transition-colors"
-                >
-                  {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
-                </button>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+          <p className="text-center text-xs text-[#43302E]/50 mt-6">
+            By continuing, you agree to our{" "}
+            <span className="underline cursor-pointer hover:text-[#43302E]">Terms of Service</span>
+          </p>
         </div>
       </motion.div>
     </div>
