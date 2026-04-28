@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     // Recalculate trust score
     const allReviews = await prisma.review.findMany({ where: { reviewed_id: body.reviewed_id } });
-    const avgScore = allReviews.reduce((acc: number, r) => acc + r.rating, 0) / allReviews.length;
+    const avgScore = allReviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) / allReviews.length;
     await prisma.user.update({
       where: { id: body.reviewed_id },
       data: { trust_score: Number(avgScore.toFixed(1)) },
