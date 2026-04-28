@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { motion, Variants } from "framer-motion";
-import { Search, Filter, Star, Clock, ArrowRightLeft, BookOpen, CheckCircle } from "lucide-react";
+import { Search, Filter, Star, Clock, ArrowRightLeft, BookOpen, CheckCircle, Repeat } from "lucide-react";
 import Image from "next/image";
 import { useStore } from "@/store/useStore";
+import Link from "next/link";
 
 const CATEGORIES = ["All", "Development", "Design", "Communication", "Marketing", "Creative"];
 
@@ -29,6 +30,7 @@ export default function ExplorePage() {
   const skills = useStore(state => state.skills);
   const addRequest = useStore(state => state.addRequest);
   const isAuthenticated = useStore(state => state.isAuthenticated);
+  const user = useStore(state => state.user);
 
   const filteredSkills = skills.filter(skill => {
     const matchesCategory = activeCategory === "All" || skill.category === activeCategory;
@@ -48,10 +50,33 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col pt-24 pb-20 px-4 md:px-12 max-w-7xl mx-auto w-full">
+    <div className="min-h-screen relative flex flex-col px-4 md:px-12 max-w-7xl mx-auto w-full">
       {/* Background elements */}
       <div className="fixed top-0 left-[-20%] w-[50%] h-[50%] rounded-full bg-secondary/40 blur-[120px] -z-10" />
       <div className="fixed bottom-0 right-[-10%] w-[40%] h-[40%] rounded-full bg-white/60 blur-[100px] -z-10" />
+
+      {/* Navigation */}
+      <nav className="w-full flex justify-between items-center py-6 z-30 mb-8 glass border-b border-border/50 sticky top-0 rounded-b-3xl px-8">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <Repeat className="text-primary-foreground w-5 h-5" />
+          </div>
+          <span className="font-heading font-bold text-2xl text-primary tracking-tight">PraMuse</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          {isAuthenticated && user ? (
+            <Link href="/dashboard" className="flex items-center gap-3 hover:bg-white/40 p-2 rounded-xl transition-colors">
+              <span className="font-medium text-primary hidden md:block">{user.name}</span>
+              <Image src={user.avatar} alt="Avatar" width={32} height={32} className="rounded-full border border-white" />
+            </Link>
+          ) : (
+            <>
+              <Link href="/auth" className="font-medium text-primary hover:text-primary/70 transition-colors">Log in</Link>
+              <Link href="/auth" className="bg-primary text-primary-foreground px-5 py-2 rounded-xl font-medium hover:bg-primary/90 transition-colors">Sign up</Link>
+            </>
+          )}
+        </div>
+      </nav>
 
       {/* Header */}
       <div className="mb-12">

@@ -13,16 +13,16 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="w-full flex justify-between items-center py-6 px-8 md:px-16 z-10 glass border-b border-border/50 sticky top-0">
-        <div className="flex items-center gap-2">
+        <a href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Repeat className="text-primary-foreground w-5 h-5" />
           </div>
           <span className="font-heading font-bold text-2xl text-primary tracking-tight">PraMuse</span>
-        </div>
+        </a>
         <div className="hidden md:flex items-center gap-8 font-medium">
-          <a href="#how-it-works" className="hover:text-primary/70 transition-colors">How it works</a>
+          <a href="/explore" className="hover:text-primary/70 transition-colors">How it works</a>
           <a href="/explore" className="hover:text-primary/70 transition-colors">Explore Skills</a>
-          <a href="#community" className="hover:text-primary/70 transition-colors">Community</a>
+          <a href="/explore" className="hover:text-primary/70 transition-colors">Community</a>
         </div>
         <div className="flex items-center gap-4">
           <a href="/auth" className="font-medium hover:text-primary/70 transition-colors hidden md:block">Log in</a>
@@ -63,13 +63,13 @@ export default function Home() {
                 placeholder="What do you want to learn?" 
                 className="bg-transparent border-none outline-none flex-1 py-2 pr-4 text-primary placeholder:text-primary/50 min-w-[250px]"
               />
-              <button className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl-xl font-medium hover:bg-primary/90 transition-colors">
+              <a href="/explore" className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl-xl font-medium hover:bg-primary/90 transition-colors inline-block text-center">
                 Search
-              </button>
+              </a>
             </div>
-            <button className="flex items-center gap-2 font-medium px-6 py-4 hover:bg-white/20 rounded-xl-xl transition-colors">
+            <a href="/dashboard" className="flex items-center gap-2 font-medium px-6 py-4 hover:bg-white/20 rounded-xl-xl transition-colors">
               Offer a Skill <ArrowRight className="w-4 h-4" />
-            </button>
+            </a>
           </div>
         </motion.div>
 
