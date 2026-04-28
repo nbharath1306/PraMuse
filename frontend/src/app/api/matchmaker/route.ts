@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { userProfile, availableSkills } = await req.json();
+    const { userProfile, availableSkills, userSkills } = await req.json();
 
     if (!availableSkills || availableSkills.length === 0) {
       return NextResponse.json({ error: 'No skills in marketplace yet' }, { status: 400 });
@@ -13,8 +13,17 @@ You are an elite AI matchmaker for a skill-bartering platform called PraMuse.
 
 Here is the user's profile:
 - Name: ${userProfile.name}
+- Skills they offer & want:
+${userSkills && userSkills.length > 0 ? JSON.stringify(
+  userSkills.map((s: { title: string; seeking: string }) => ({
+    offering: s.title,
+    seeking: s.seeking,
+  })),
+  null,
+  2
+) : "None listed yet. Match them based on potential interests."}
 
-Here are the available skills on the marketplace (each posted by a different person):
+Here are the available skills on the marketplace:
 ${JSON.stringify(
   availableSkills.map((s: { id: string; title: string; seeking: string; category: string; user: { name: string } }) => ({
     id: s.id,
@@ -28,11 +37,11 @@ ${JSON.stringify(
 )}
 
 Task: Find the single BEST skill from the list above that would be most valuable for ${userProfile.name} to learn or exchange.
-Consider variety of categories and pick the most interesting or complementary one.
+Match them such that what they offer overlaps with what the other person seeks, or what the other person offers overlaps with what ${userProfile.name} seeks. If no direct overlap, pick the best complementary match.
 
 Return ONLY a raw JSON object in this exact format with no markdown or extra text:
 {"matchId": "<id string here>", "reason": "<one punchy sentence explaining why this is a perfect match for them>"}
-    `.trim();
+`.trim();
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',

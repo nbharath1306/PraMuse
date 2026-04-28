@@ -49,7 +49,7 @@ export default function Dashboard() {
       const res = await fetch('/api/matchmaker', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userProfile: user, availableSkills: available })
+        body: JSON.stringify({ userProfile: user, availableSkills: available, userSkills: skills })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to find match");
@@ -198,9 +198,15 @@ export default function Dashboard() {
                     <button onClick={() => setAiMatchResult(null)} className="text-[#43302E]/40 hover:text-[#43302E]"><X className="w-4 h-4" /></button>
                   </div>
                   <p className="text-[#43302E] font-medium text-sm leading-relaxed">{aiMatchResult!.reason}</p>
-                  <button onClick={() => router.push('/explore')} className="mt-3 text-sm font-bold text-[#8A5A53] hover:text-[#43302E] flex items-center gap-1">
-                    View in Explore <ArrowRight className="w-4 h-4" />
-                  </button>
+                  {(() => {
+                    const matchedSkill = allSkills.find(s => s.id === aiMatchResult!.matchId);
+                    if (!matchedSkill) return null;
+                    return (
+                      <button onClick={() => router.push(`/users/${matchedSkill.user.id}`)} className="mt-3 text-sm font-bold text-[#8A5A53] hover:text-[#43302E] flex items-center gap-1">
+                        View Profile & Request Swap <ArrowRight className="w-4 h-4" />
+                      </button>
+                    );
+                  })()}
                 </div>
               )}
             </div>

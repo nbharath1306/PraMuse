@@ -54,7 +54,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         avatar: body.avatar?.trim() || null,
       },
       create: {
-        id,
         name: body.name.trim(),
         email: body.email || `${id}@pramuse.app`,
         avatar: body.avatar?.trim() || null,
