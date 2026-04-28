@@ -53,6 +53,18 @@ export default function InboxPage() {
     setSelectedSwapId(null);
   };
 
+  // For the Chat Modal
+  const [activeChatSwap, setActiveChatSwap] = useState<any>(null);
+  const [messageInput, setMessageInput] = useState("");
+  const messagesForActiveChat = useStore(state => state.messages).filter(m => activeChatSwap && m.swapId === activeChatSwap.id);
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageInput.trim() || !activeChatSwap) return;
+    useStore.getState().sendMessage(activeChatSwap.id, messageInput);
+    setMessageInput("");
+  };
+
   return (
     <div className="min-h-screen bg-[#FFF1B5] relative pb-20">
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
@@ -163,8 +175,8 @@ export default function InboxPage() {
                   </div>
                   <div className="flex items-center gap-3 w-full md:w-auto">
                     <button 
-                      onClick={() => toast.info("Opening chat UI... (Coming soon)")}
-                      className="flex-1 md:flex-none px-4 py-2 rounded-xl text-[#43302E] bg-white/60 font-bold hover:bg-white transition-colors flex items-center justify-center gap-2 border border-white"
+                      onClick={() => setActiveChatSwap(swap)}
+                      className="flex-1 md:flex-none px-4 py-2 rounded-xl text-[#43302E] bg-white/60 font-bold hover:bg-white transition-colors flex items-center justify-center gap-2 border border-white shadow-sm"
                     >
                       <MessageSquare className="w-4 h-4" /> Chat
                     </button>
@@ -190,7 +202,7 @@ export default function InboxPage() {
 
       {/* Review Modal */}
       {isReviewModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-[#43302E]/60 backdrop-blur-sm" onClick={() => setIsReviewModalOpen(false)} />
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -227,6 +239,75 @@ export default function InboxPage() {
                 Submit Review
               </button>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Live Chat Modal */}
+      {activeChatSwap && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center px-4 sm:p-0 pointer-events-none">
+          <div className="absolute inset-0 bg-[#43302E]/20 backdrop-blur-sm pointer-events-auto" onClick={() => setActiveChatSwap(null)} />
+          <motion.div 
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative w-full sm:max-w-md h-[80vh] sm:h-[600px] bg-white rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl z-10 flex flex-col overflow-hidden pointer-events-auto border border-[#43302E]/10"
+          >
+            {/* Chat Header */}
+            <div className="bg-[#FFF1B5] p-4 flex items-center justify-between border-b border-[#43302E]/10">
+              <div className="flex items-center gap-3">
+                <Image src={activeChatSwap.partnerAvatar} alt="Avatar" width={40} height={40} className="rounded-full border-2 border-white shadow-sm" />
+                <div>
+                  <h3 className="font-bold text-[#43302E]">{activeChatSwap.partnerName}</h3>
+                  <p className="text-xs text-[#43302E]/70 font-medium">Trading: {activeChatSwap.skillExchanged}</p>
+                </div>
+              </div>
+              <button onClick={() => setActiveChatSwap(null)} className="p-2 rounded-full hover:bg-white/50 text-[#43302E] transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 flex flex-col">
+              {messagesForActiveChat.map((msg, index) => {
+                const isMe = msg.senderId === 'me';
+                return (
+                  <motion.div 
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${isMe ? 'bg-[#43302E] text-white rounded-tr-sm' : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm'}`}>
+                      <p className="text-sm">{msg.text}</p>
+                      <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-white/60' : 'text-gray-400'}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Input Area */}
+            <div className="p-4 bg-white border-t border-gray-100">
+              <form onSubmit={handleSend} className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  placeholder="Type a message..." 
+                  className="flex-1 bg-gray-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#43302E]/20 outline-none"
+                />
+                <button 
+                  type="submit" 
+                  disabled={!messageInput.trim()}
+                  className="bg-[#43302E] text-white px-4 py-3 rounded-xl font-medium disabled:opacity-50 transition-opacity"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
           </motion.div>
         </div>
       )}
