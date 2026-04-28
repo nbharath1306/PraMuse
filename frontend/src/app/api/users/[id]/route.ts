@@ -12,6 +12,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         name: true,
         avatar: true,
         trust_score: true,
+        email: true,
         created_at: true,
         skills: {
           orderBy: { created_at: 'desc' },
@@ -21,10 +22,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           orderBy: { created_at: 'desc' },
           take: 10,
           select: {
-            id: true,
-            rating: true,
-            feedback: true,
-            created_at: true,
+            id: true, rating: true, feedback: true, created_at: true,
             reviewer: { select: { id: true, name: true, avatar: true } },
           },
         },
@@ -38,21 +36,36 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 }
 
-// PUT /api/users/:id — update profile
+// PUT /api/users/:id — update profile (upsert so it never fails on missing user)
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await req.json();
-    const user = await prisma.user.update({
+
+    if (!body.name?.trim()) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    // Use upsert — if user doesn't exist yet, create them
+    const user = await prisma.user.upsert({
       where: { id },
-      data: {
-        name: body.name,
-        avatar: body.avatar || null,
+      update: {
+        name: body.name.trim(),
+        avatar: body.avatar?.trim() || null,
+      },
+      create: {
+        id,
+        name: body.name.trim(),
+        email: body.email || `${id}@pramuse.app`,
+        avatar: body.avatar?.trim() || null,
+        trust_score: 5.0,
       },
     });
+
     return NextResponse.json(user);
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Unknown error';
+    console.error('PUT /api/users/[id] error:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -78,12 +78,11 @@ export const useStore = create<AppState>()(
         const res = await fetch(`/api/users/${user.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, email: user.email }),
         });
-        if (!res.ok) throw new Error('Update failed');
-        const updated = await res.json();
-        // Merge DB response back into store, preserving trust_score
-        set({ user: { ...user, ...updated } });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Update failed');
+        set({ user: { ...user, ...json } });
       },
     }),
     { name: 'pramuse-storage' }
