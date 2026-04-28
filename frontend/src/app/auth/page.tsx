@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Repeat, ArrowRight, Mail, Lock, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,13 @@ export default function AuthPage() {
   const [name, setName] = useState("");
   const router = useRouter();
   const login = useStore((state) => state.login);
+  const isAuthenticated = useStore((state) => state.isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

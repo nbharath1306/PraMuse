@@ -1,10 +1,19 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Sparkles, ArrowRight, UserCheck, Repeat, Star } from "lucide-react";
+import { useStore } from "@/store/useStore";
 import Image from "next/image";
 
 export default function Home() {
+  const isAuthenticated = useStore(state => state.isAuthenticated);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col">
       {/* Abstract Background Shapes */}
@@ -25,10 +34,18 @@ export default function Home() {
           <a href="/explore" className="hover:text-primary/70 transition-colors">Community</a>
         </div>
         <div className="flex items-center gap-4">
-          <a href="/auth" className="font-medium hover:text-primary/70 transition-colors hidden md:block">Log in</a>
-          <a href="/auth" className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl-xl font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
-            Join Waitlist
-          </a>
+          {mounted && isAuthenticated ? (
+            <a href="/dashboard" className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl-xl font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+              Go to Dashboard
+            </a>
+          ) : (
+            <>
+              <a href="/auth" className="font-medium hover:text-primary/70 transition-colors hidden md:block">Log in</a>
+              <a href="/auth" className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl-xl font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+                Join Waitlist
+              </a>
+            </>
+          )}
         </div>
       </nav>
 

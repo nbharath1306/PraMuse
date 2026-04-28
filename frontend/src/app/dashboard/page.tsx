@@ -5,13 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, LayoutDashboard, PlusCircle, Repeat, ArrowRightLeft, Star, X, Trash2, BookOpen, Clock, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function Dashboard() {
   const { user, isAuthenticated, logout, pendingRequests, addSkill, skills, deleteSkill } = useStore();
   const router = useRouter();
   
+  const [mounted, setMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     offering: "",
@@ -21,9 +22,22 @@ export default function Dashboard() {
     availability: ""
   });
 
-  if (!isAuthenticated || !user) {
-    if (typeof window !== 'undefined') router.push("/auth");
-    return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && (!isAuthenticated || !user)) {
+      router.push("/auth");
+    }
+  }, [mounted, isAuthenticated, user, router]);
+
+  if (!mounted || !isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-[#FFF1B5] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#43302E]/20 border-t-[#43302E] rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   const handleLogout = () => {
