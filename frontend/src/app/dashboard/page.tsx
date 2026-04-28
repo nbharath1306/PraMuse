@@ -13,6 +13,30 @@ export default function Dashboard() {
   const router = useRouter();
   
   const [mounted, setMounted] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiMatchResult, setAiMatchResult] = useState<{ matchId: number, reason: string } | null>(null);
+
+  const handleAiMatch = async () => {
+    if (!user) return;
+    setIsAiLoading(true);
+    try {
+      const availableSkills = skills.filter(s => s.provider !== user.name);
+      const res = await fetch('/api/matchmaker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userProfile: user, availableSkills })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to find match");
+      setAiMatchResult(data);
+      toast.success("AI found a perfect match!");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     offering: "",
@@ -144,6 +168,49 @@ export default function Dashboard() {
             <p className="text-3xl font-heading font-bold text-[#43302E] mt-1">{useStore.getState().requests?.length || 0}</p>
           </motion.div>
         </div>
+
+        {/* AI Matchmaker */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-16">
+          <div className="glass p-8 rounded-[2.5rem] border border-white/40 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#D4AF37]/20 to-transparent rounded-full blur-3xl" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div>
+                <h3 className="text-2xl font-heading font-bold text-[#43302E] mb-2 flex items-center gap-2">
+                  <Star className="w-6 h-6 text-[#D4AF37] fill-[#D4AF37]" /> AI Magic Match
+                </h3>
+                <p className="text-[#43302E]/70 max-w-md">Our Llama-3 AI will analyze your profile and instantly find the perfect skill exchange partner from the global marketplace.</p>
+              </div>
+              
+              {!aiMatchResult && !isAiLoading ? (
+                <button 
+                  onClick={handleAiMatch}
+                  className="px-8 py-4 bg-[#43302E] text-[#FFF1B5] rounded-2xl font-bold hover:bg-[#43302E]/90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 whitespace-nowrap"
+                >
+                  Find My Match
+                </button>
+              ) : isAiLoading ? (
+                <div className="px-8 py-4 glass text-[#43302E] rounded-2xl font-bold flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-[#43302E]/20 border-t-[#43302E] rounded-full animate-spin" />
+                  Analyzing marketplace...
+                </div>
+              ) : (
+                <div className="glass bg-white/50 p-4 rounded-2xl border border-white max-w-sm">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-bold tracking-wider text-[#D4AF37] uppercase">Top Match Found</span>
+                    <button onClick={() => setAiMatchResult(null)} className="text-[#43302E]/40 hover:text-[#43302E]"><X className="w-4 h-4"/></button>
+                  </div>
+                  <p className="text-[#43302E] font-medium text-sm leading-relaxed">{aiMatchResult.reason}</p>
+                  <button 
+                    onClick={() => router.push('/explore')}
+                    className="mt-3 text-sm font-bold text-[#8A5A53] hover:text-[#43302E] flex items-center gap-1"
+                  >
+                    View in Explore <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
 
         {/* User Published Skills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
