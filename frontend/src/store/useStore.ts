@@ -5,7 +5,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  avatar: string;
+  avatar: string | null;
   trust_score: number;
 };
 
@@ -82,7 +82,8 @@ export const useStore = create<AppState>()(
         });
         if (!res.ok) throw new Error('Update failed');
         const updated = await res.json();
-        set({ user: updated });
+        // Merge DB response back into store, preserving trust_score
+        set({ user: { ...user, ...updated } });
       },
     }),
     { name: 'pramuse-storage' }
