@@ -1,17 +1,33 @@
 @import "tailwindcss";
 
+/* ── Light theme (default) ── */
 :root {
-  --background: #FFF1B5; /* Primary Cream */
-  --foreground: #43302E; /* Deep Burgundy */
-  --primary: #43302E; 
+  --background: #FFF1B5;
+  --foreground: #43302E;
+  --primary: #43302E;
   --primary-foreground: #FFF1B5;
-  --secondary: #C1DBE8; /* Secondary Blue */
-  --secondary-foreground: #43302E;
+  --secondary: #C1DBE8;
   --card: rgba(255, 255, 255, 0.6);
-  --card-foreground: #43302E;
   --border: rgba(67, 48, 46, 0.1);
   --ring: #43302E;
-  --radius: 1.25rem; /* 20px */
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --muted: rgba(67, 48, 46, 0.6);
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] {
+  --background: #1A1108;
+  --foreground: #FFF1B5;
+  --primary: #FFF1B5;
+  --primary-foreground: #1A1108;
+  --secondary: #2C2010;
+  --card: rgba(40, 25, 10, 0.7);
+  --border: rgba(255, 241, 181, 0.1);
+  --ring: #D4AF37;
+  --glass-bg: rgba(30, 18, 5, 0.6);
+  --glass-border: rgba(212, 175, 55, 0.15);
+  --muted: rgba(255, 241, 181, 0.5);
 }
 
 @theme inline {
@@ -20,12 +36,9 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
   --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
-  --radius-xl: var(--radius);
   --font-sans: var(--font-inter);
   --font-heading: var(--font-poppins);
 }
@@ -34,12 +47,34 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism utility — theme-aware */
 .glass {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--glass-border);
 }
+
+/* Dark mode aware backgrounds */
+[data-theme="dark"] .bg-\[\#FFF1B5\] {
+  background-color: #1A1108 !important;
+}
+
+[data-theme="dark"] .text-\[\#43302E\] {
+  color: #FFF1B5 !important;
+}
+
+[data-theme="dark"] .bg-\[\#43302E\] {
+  background-color: #D4AF37 !important;
+}
+
+[data-theme="dark"] .text-\[\#FFF1B5\] {
+  color: #1A1108 !important;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

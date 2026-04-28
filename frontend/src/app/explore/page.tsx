@@ -123,19 +123,21 @@ export default function ExplorePage() {
                 <motion.div key={skill.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.04 }}
                   className="glass p-6 rounded-3xl border border-white/40 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
-                    {skill.user.avatar ? (
-                      <Image src={skill.user.avatar} alt={skill.user.name} width={44} height={44} className="rounded-full border-2 border-white shadow-sm" />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-[#43302E] flex items-center justify-center text-[#FFF1B5] font-bold">{skill.user.name[0]}</div>
-                    )}
-                    <div>
-                      <p className="font-bold text-[#43302E]">{skill.user.name}</p>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-[#D4AF37] text-[#D4AF37]" />
-                        <span className="text-xs text-[#43302E]/60">{skill.user.trust_score?.toFixed(1)}</span>
+                    <Link href={`/users/${skill.user.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1 min-w-0">
+                      {skill.user.avatar ? (
+                        <Image src={skill.user.avatar} alt={skill.user.name} width={44} height={44} className="rounded-full border-2 border-white shadow-sm flex-shrink-0" />
+                      ) : (
+                        <div className="w-11 h-11 rounded-full bg-[#43302E] flex items-center justify-center text-[#FFF1B5] font-bold flex-shrink-0">{skill.user.name[0]}</div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-bold text-[#43302E] truncate">{skill.user.name}</p>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-[#D4AF37] text-[#D4AF37]" />
+                          <span className="text-xs text-[#43302E]/60">{skill.user.trust_score?.toFixed(1)}</span>
+                        </div>
                       </div>
-                    </div>
-                    <span className="ml-auto text-xs font-bold bg-[#43302E]/10 text-[#43302E] px-2 py-1 rounded-full">{skill.category}</span>
+                    </Link>
+                    <span className="ml-auto text-xs font-bold bg-[#43302E]/10 text-[#43302E] px-2 py-1 rounded-full flex-shrink-0">{skill.category}</span>
                   </div>
 
                   <h3 className="font-bold text-lg text-[#43302E] mb-1">{skill.title}</h3>

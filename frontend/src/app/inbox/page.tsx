@@ -2,12 +2,12 @@
 
 import { useStore } from "@/store/useStore";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, X, MessageSquare, Repeat, Clock, Star, Send, Loader2 } from "lucide-react";
+import { Check, X, MessageSquare, Clock, Star, Send, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
 
 export default function InboxPage() {
   const { user, isAuthenticated } = useStore();
@@ -43,12 +43,23 @@ export default function InboxPage() {
     setLoading(false);
   };
 
-  const openChat = async (swap: any) => {
-    setActiveChatSwap(swap);
-    const res = await fetch(`/api/messages?swapId=${swap.id}`);
+  const fetchMessages = useCallback(async (swapId: string) => {
+    const res = await fetch(`/api/messages?swapId=${swapId}`);
     const data = res.ok ? await res.json() : [];
     setMessages(data);
+  }, []);
+
+  const openChat = async (swap: any) => {
+    setActiveChatSwap(swap);
+    fetchMessages(swap.id);
   };
+
+  // Poll messages every 3 seconds when chat is open
+  useEffect(() => {
+    if (!activeChatSwap) return;
+    const interval = setInterval(() => fetchMessages(activeChatSwap.id), 3000);
+    return () => clearInterval(interval);
+  }, [activeChatSwap?.id, fetchMessages]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,17 +120,9 @@ export default function InboxPage() {
     <div className="min-h-screen bg-[#FFF1B5] relative pb-20">
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
 
-      <nav className="w-full flex justify-between items-center py-6 px-8 md:px-16 z-10 glass border-b border-[#43302E]/10 sticky top-0 mb-12">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#43302E] flex items-center justify-center"><Repeat className="text-[#FFF1B5] w-5 h-5" /></div>
-          <span className="font-heading font-bold text-2xl text-[#43302E] tracking-tight">PraMuse</span>
-        </Link>
-        <button onClick={() => router.push("/dashboard")} className="font-medium text-[#43302E] hover:text-[#43302E]/70 transition-colors flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" /> Dashboard
-        </button>
-      </nav>
+      <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 z-10 relative">
+      <main className="max-w-4xl mx-auto px-4 z-10 relative pt-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="text-4xl font-heading font-bold text-[#43302E] mb-2 flex items-center gap-3">
             <MessageSquare className="w-8 h-8" /> Inbox
