@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function Dashboard() {
-  const { user, isAuthenticated, logout, pendingRequests, addSkill, skills, deleteSkill } = useStore();
+  const { user, isAuthenticated, logout, addSkill, skills, deleteSkill } = useStore();
   const router = useRouter();
   
   const [mounted, setMounted] = useState(false);
