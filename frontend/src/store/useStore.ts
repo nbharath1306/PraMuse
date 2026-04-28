@@ -81,7 +81,7 @@ export const useStore = create<AppState>()(
             id: Math.random().toString(36).substr(2, 9), 
             name, 
             email, 
-            avatar: `https://i.pravatar.cc/150?u=${email}`,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=43302E&color=FFF1B5&bold=true`,
             trustScore: 5.0
           }, 
           isAuthenticated: true 
