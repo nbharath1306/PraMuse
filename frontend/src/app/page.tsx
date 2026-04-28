@@ -25,10 +25,10 @@ export default function Home() {
           <a href="#community" className="hover:text-primary/70 transition-colors">Community</a>
         </div>
         <div className="flex items-center gap-4">
-          <button className="font-medium hover:text-primary/70 transition-colors hidden md:block">Log in</button>
-          <button className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl-xl font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <a href="/auth" className="font-medium hover:text-primary/70 transition-colors hidden md:block">Log in</a>
+          <a href="/auth" className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl-xl font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
             Join Waitlist
-          </button>
+          </a>
         </div>
       </nav>
 
