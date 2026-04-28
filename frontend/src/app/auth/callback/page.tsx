@@ -11,20 +11,39 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const u = session.user;
-        // Try to get name from metadata or localStorage (magic link flow)
-        const pendingName = localStorage.getItem("pramuse-pending-name");
-        const displayName = pendingName || u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || "User";
-        localStorage.removeItem("pramuse-pending-name");
-        // Sync with our Prisma DB
-        await useStore.getState().login(u.email!, displayName);
-        router.replace("/dashboard");
-      } else {
+    
+    const handleAuth = async () => {
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const code = searchParams.get('code');
+        
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const u = session.user;
+          // Try to get name from metadata or localStorage (magic link flow)
+          const pendingName = localStorage.getItem("pramuse-pending-name");
+          const displayName = pendingName || u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || "User";
+          localStorage.removeItem("pramuse-pending-name");
+          
+          // Sync with our Prisma DB
+          await useStore.getState().login(u.email!, displayName);
+          router.replace("/dashboard");
+        } else {
+          router.replace("/auth");
+        }
+      } catch (error) {
+        console.error("Auth callback error:", error);
         router.replace("/auth");
       }
-    });
+    };
+
+    handleAuth();
   }, [router]);
 
   return (
