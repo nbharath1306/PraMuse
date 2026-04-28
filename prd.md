@@ -1,4 +1,4 @@
-**SKILLSWAP HUB**
+**PRAMUSE**
 =================
 
 **Venture-Backed Product Requirements Document (PRD) + Technical Blueprint**
@@ -17,7 +17,7 @@
 **Product Overview**
 --------------------
 
-SkillSwap Hub is a full-stack peer-to-peer marketplace where people exchange skills instead of money.
+PraMuse is a full-stack peer-to-peer marketplace where people exchange skills instead of money.
 
 Users teach what they know and receive another skill in return.
 
@@ -1094,7 +1094,7 @@ P3 Future
 **Abstract**
 ------------
 
-SkillSwap Hub is a full stack barter marketplace that enables users to exchange skills through a digital trust-driven ecosystem using matchmaking, scheduling, and reputation systems.
+PraMuse is a full stack barter marketplace that enables users to exchange skills through a digital trust-driven ecosystem using matchmaking, scheduling, and reputation systems.
 
 * * * * *
 
@@ -1120,7 +1120,7 @@ Innovations:
 **Resume Project Description**
 ------------------------------
 
-Built SkillSwap Hub, a full-stack skill exchange marketplace using Next.js, Node.js and PostgreSQL featuring matching engine, messaging, scheduling and reputation systems.
+Built PraMuse, a full-stack skill exchange marketplace using Next.js, Node.js and PostgreSQL featuring matching engine, messaging, scheduling and reputation systems.
 
 * * * * *
 
@@ -1141,7 +1141,7 @@ Built SkillSwap Hub, a full-stack skill exchange marketplace using Next.js, Node
 **Faculty Demo Pitch**
 ----------------------
 
-"SkillSwap Hub transforms learning from a paid transaction into a collaborative exchange economy."
+"PraMuse transforms learning from a paid transaction into a collaborative exchange economy."
 
 Demo Flow:\
 Register\
@@ -1159,14 +1159,14 @@ Review session
 **Brand Refinement Options**
 ----------------------------
 
-1 SkillSwap Hub\
-2 SkillLoop\
+1 PraMuse\
+2 PraMuse\
 3 SwapLearn\
 4 SkillBarter\
 5 SkillVerse
 
 Recommended:\
-SkillLoop\
+PraMuse\
 (venture scalable naming)
 
 * * * * *
@@ -1284,7 +1284,7 @@ This stack is portfolio-grade and startup-grade.
 **Long-Term Vision**
 --------------------
 
-SkillSwap Hub evolves from marketplace → trust network → decentralized skill economy.
+PraMuse evolves from marketplace → trust network → decentralized skill economy.
 
 That is startup scale.
 

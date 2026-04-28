@@ -17,7 +17,7 @@ export default function Home() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Repeat className="text-primary-foreground w-5 h-5" />
           </div>
-          <span className="font-heading font-bold text-2xl text-primary tracking-tight">SkillLoop</span>
+          <span className="font-heading font-bold text-2xl text-primary tracking-tight">PraMuse</span>
         </div>
         <div className="hidden md:flex items-center gap-8 font-medium">
           <a href="#how-it-works" className="hover:text-primary/70 transition-colors">How it works</a>
@@ -98,7 +98,7 @@ export default function Home() {
 
       {/* Footer minimal */}
       <footer className="py-8 text-center text-primary/60 text-sm glass mt-auto border-t border-border/50">
-        <p>© 2026 SkillLoop Inc. Alternative Learning Marketplace.</p>
+        <p>© 2026 PraMuse Inc. Alternative Learning Marketplace.</p>
       </footer>
     </div>
   );

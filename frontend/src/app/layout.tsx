@@ -14,7 +14,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "SkillLoop | Trade Skills. Build Futures.",
+  title: "PraMuse | Trade Skills. Build Futures.",
   description: "A two-sided skill barter marketplace platform where you learn by giving.",
 };
 
